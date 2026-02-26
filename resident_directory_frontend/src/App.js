@@ -1,48 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { AuthProvider } from "./context/AuthContext";
+import { Layout } from "./components/Layout";
+import { RequireAuth } from "./components/RequireAuth";
+
+import { ResidentsListPage } from "./pages/ResidentsListPage";
+import { ResidentDetailPage } from "./pages/ResidentDetailPage";
+import { AdminLoginPage } from "./pages/AdminLoginPage";
+import { AdminResidentsPage } from "./pages/AdminResidentsPage";
+import { AdminResidentCreatePage } from "./pages/AdminResidentCreatePage";
+import { AdminResidentEditPage } from "./pages/AdminResidentEditPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
+  /** Root application with routing + auth provider. */
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<ResidentsListPage />} />
+            <Route path="/residents/:id" element={<ResidentDetailPage />} />
+
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+
+            <Route
+              path="/admin/residents"
+              element={
+                <RequireAuth>
+                  <AdminResidentsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/residents/new"
+              element={
+                <RequireAuth>
+                  <AdminResidentCreatePage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/residents/:id/edit"
+              element={
+                <RequireAuth>
+                  <AdminResidentEditPage />
+                </RequireAuth>
+              }
+            />
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
